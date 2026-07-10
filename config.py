@@ -11,6 +11,7 @@ class Config:
     groq_api_key: str
     embedding_model: str
     llm_model: str
+    query_transformer_model: str
     eval_llm_model: str
     reranker_model: str
     collection_name: str
@@ -31,6 +32,7 @@ def load_config() -> Config:
         groq_api_key=os.getenv("GROQ_API_KEY"),
         embedding_model=cfg["models"]["embedding_model"],
         llm_model=cfg["models"]["llm_model"],
+        query_transformer_model=cfg["models"]["query_transformer"],
         eval_llm_model=cfg["models"]["eval_llm_model"],
         reranker_model=cfg["models"]["reranker_model"],
         collection_name=cfg["vectorstore"]["collection_name"],
