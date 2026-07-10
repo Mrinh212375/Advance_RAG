@@ -41,7 +41,7 @@ class Chunker:
         return chunks
 
     
-    def custom_section_aware_splitter(self,threshold=None):
+    def custom_section_aware_splitter(self,threshold=1500):
 
         md_content = self.dataloader.load_content_as_Md()
 
@@ -135,7 +135,7 @@ class Chunker:
         # ---------- the chunker ----------
 
         class SectionAwareChunker:
-            def __init__(self, markdown_text, threshold=1500):
+            def __init__(self, markdown_text, threshold):
                 self.text = markdown_text
                 self.threshold = threshold
 

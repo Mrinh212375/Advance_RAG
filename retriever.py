@@ -38,4 +38,30 @@ class HybridRetriever:
         )
 
     def get_retriever(self) -> ContextualCompressionRetriever:
-        return self.compression_retriever
+        # return self.compression_retriever
+        return self.hybrid_retriever
+
+
+if __name__ == "__main__":
+
+    import config
+    from vectorstore import VectorStore
+
+    cfg = config.load_config()
+
+    vs = VectorStore(cfg.embedding_model, cfg.collection_name, cfg.persist_directory)
+    documents = vs.get_all_documents()
+    print(f"Loaded {len(documents)} documents from the vector store.")
+
+    hybrid_retriever = HybridRetriever(vs.get_store(), documents, cfg.reranker_model).get_retriever()
+
+    test_query = "What are the payment terms?"
+    results = hybrid_retriever.invoke(test_query)
+
+    print(f"\nQuery: {test_query}")
+    print(f"Retrieved {len(results)} chunks:\n")
+    for i, doc in enumerate(results, start=1):
+        print(f"--- Chunk {i} ---")
+        print(f"Metadata: {doc.metadata}")
+        print(f"Content:\n{doc.page_content}\n")
+
