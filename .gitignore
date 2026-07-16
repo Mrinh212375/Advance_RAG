@@ -4,3 +4,4 @@ Chroma_langchain_DB
 __pycache__
 record.txt
 config.yaml
+tests
