@@ -14,10 +14,10 @@ class HybridRetriever:
         vector_store: Chroma,
         documents: list[Document],
         reranker_model: str,
-        dense_k: int = 5,
+        dense_k: int = 6,
         lambda_mult: float = 0.75,
-        bm25_k: int = 5,
-        top_n: int = 3,
+        bm25_k: int = 6,
+        top_n: int = 5,
     ) -> None:
         self.vector_store_retriever = vector_store.as_retriever(
             search_type="mmr", search_kwargs={"k": dense_k, "lambda_mult": lambda_mult}
@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     test_query = "What are the payment terms?"
     results = hybrid_retriever.invoke(test_query)
+    
 
     print(f"\nQuery: {test_query}")
     print(f"Retrieved {len(results)} chunks:\n")

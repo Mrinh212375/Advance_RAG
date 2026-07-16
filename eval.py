@@ -11,11 +11,12 @@ from ragas.metrics import (
     LLMContextRecall, LLMContextPrecisionWithReference,
     Faithfulness, SemanticSimilarity,
 )
+from langchain_openai import ChatOpenAI
 
 class RAGEvaluator:
 
     def __init__(self, eval_llm_model: str, groq_api_key: str, embedding_model: str) -> None:
-        llm = ChatGroq(model=eval_llm_model, api_key=groq_api_key)
+        llm = ChatOpenAI(model=eval_llm_model, api_key=groq_api_key)
         self.evaluator_llm = LangchainLLMWrapper(llm)
         self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
         self.metrics = [

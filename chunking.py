@@ -6,6 +6,11 @@ from langchain_docling.loader import ExportType
 from docling.chunking import HybridChunker
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from langchain_core.documents import Document
+from langchain_groq import ChatGroq
+from langchain_openrouter import ChatOpenRouter
+from langchain_openai import ChatOpenAI
+
+import config
 
 
 class Chunker:
@@ -167,8 +172,58 @@ class Chunker:
 
         return chunker.split()
 
+    #### This is Anthropic's contextual retrieval(basically a chunking strategy to prepend contexts before every chunks)
+    def contextual_chunking(self):
+
+        cfg = config.load_config()
+
+        contextual_creator_model = ChatOpenAI(
+                    model=cfg.open_ai_model,
+                    temperature=0,
+                    max_tokens=1024,
+                    max_retries=2,
+                    api_key=cfg.openai_api_key
+                )
+
+
+        entire_doc = self.dataloader.load_file_content()
+        chunks = self.custom_section_aware_splitter()
+        # print(entire_doc)
+
+        prompt = '''
+        Here is the whole document:
+        <document>
+        {WHOLE_DOCUMENT}
+        </document>
+
+        Here is the chunk we want to situate within the whole document
+        <chunk>
+        {CHUNK_CONTENT}
+        </chunk>
+
+        Please give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk.
+        Answer only with the succinct context and nothing else.
+        Don't include any special character in your response,just normal text is enough.
+        '''
+
+        for i in chunks:
+            print("calling\n")
+            response = contextual_creator_model.invoke(prompt.format(WHOLE_DOCUMENT = entire_doc[0].page_content, CHUNK_CONTENT = i.page_content))
+            i.page_content = response.content + "\n" + i.page_content
+        
+        return chunks
+
+
     ### Langchain Unstructured
     # def unstructured_section_aware_splitter():
+
+if __name__=="__main__":
+
+    ch = Chunker(r"D:\Learning\DocsForRAG\SDI PO TC-India.pdf")
+    chunks = ch.contextual_chunking()
+
+    for i in chunks:
+        print(f"\n\n{i.page_content}")
 
 
 

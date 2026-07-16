@@ -10,7 +10,8 @@ def run_ingestion(vs: VectorStore, pdf_path: str, collection_name: str) -> None:
     if vs.is_empty():
 
         # docs = DataLoader(pdf_path).load_file_content()
-        chunks = Chunker(pdf_path).custom_section_aware_splitter()
+        # chunks = Chunker(pdf_path).custom_section_aware_splitter()
+        chunks = Chunker(pdf_path).contextual_chunking()
         vs.ingest(chunks)
         print(f"Ingested {len(chunks)} chunks into '{collection_name}'.")
     else:

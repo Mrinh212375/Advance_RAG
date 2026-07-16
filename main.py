@@ -6,6 +6,9 @@ from retriever import HybridRetriever
 from chain import RAGChain
 from eval import RAGEvaluator
 from query_transform import qry_transformer
+from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from langchain_openai import ChatOpenAI
 
 import config
 
@@ -26,9 +29,9 @@ if __name__ == "__main__":
 
     # rag = build_rag_chain(cfg) 
 
-    query_transformer_model = ChatGroq(model_name=cfg.query_transformer_model, groq_api_key=cfg.groq_api_key)
+    query_transformer_model = ChatOpenAI(model_name=cfg.open_ai_model, api_key=cfg.openai_api_key)
 
-    generator_llm = ChatGroq(model_name=cfg.llm_model, groq_api_key=cfg.groq_api_key)
+    generator_llm = ChatOpenAI(model_name=cfg.open_ai_model, api_key=cfg.openai_api_key)
     query_transformer = qry_transformer(query_transformer_model)
 
     vs = VectorStore(cfg.embedding_model, cfg.collection_name, cfg.persist_directory)
@@ -78,7 +81,7 @@ if __name__ == "__main__":
                     - always remeber your task is to lookup both the context and user_query and answer(if possible).
             '''
         
-        def fuse(ranked_lists, k=60, top=4):
+        def fuse(ranked_lists, k=60, top=10):
             scores, lookup = {}, {}
             for ranked in ranked_lists:
                 for rank, doc in enumerate(ranked):
@@ -89,8 +92,15 @@ if __name__ == "__main__":
 
         # in the loop:
         fused = fuse([retriever.invoke(expanded_query), retriever.invoke(hyde)])
+        
 
-        context_list = [d.page_content for d in fused]
+        #### Fuse then Rerank steps using Cross-Encoder-Reranker
+        compressor = CrossEncoderReranker(model = HuggingFaceCrossEncoder(model_name = cfg.reranker_model),top_n = 4)
+        fused_reranked_docs = compressor.compress_documents(documents=fused, query=q)
+
+        # context_list = [d.page_content for d in fused]
+
+        context_list = [d.page_content for d in fused_reranked_docs]
         retrieved_context = "\n".join(context_list)
         prompt = system_prompt.format(context=retrieved_context) + f"\n\nQuestion: {q}"
         response = generator_llm.invoke(prompt)
@@ -100,7 +110,7 @@ if __name__ == "__main__":
         answers.append(response.content)
         contexts.append(context_list)
 
-    evaluator = RAGEvaluator(cfg.eval_llm_model, cfg.groq_api_key, cfg.embedding_model)
+    evaluator = RAGEvaluator(cfg.open_ai_model, cfg.openai_api_key, cfg.embedding_model)
     eval_result = evaluator.evaluate(questions, references, answers, contexts)
     print(eval_result)
 

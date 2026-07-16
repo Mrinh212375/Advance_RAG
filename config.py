@@ -9,9 +9,12 @@ from dotenv import load_dotenv
 @dataclass(frozen=True)
 class Config:
     groq_api_key: str
+    openrouter_api_key:str
+    openai_api_key: str
     embedding_model: str
     llm_model: str
     query_transformer_model: str
+    contextual_chunk_creator_model:str
     eval_llm_model: str
     reranker_model: str
     collection_name: str
@@ -20,6 +23,7 @@ class Config:
     golden_set_path: str
     eval_output_file: str
     eval_sheet_name: str
+    open_ai_model: str
 
 
 def load_config() -> Config:
@@ -30,9 +34,13 @@ def load_config() -> Config:
 
     return Config(
         groq_api_key=os.getenv("GROQ_API_KEY"),
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY"),
+        openai_api_key = os.getenv("OPENAI_KEY"),
         embedding_model=cfg["models"]["embedding_model"],
+        open_ai_model=cfg["models"]["openai_model"],
         llm_model=cfg["models"]["llm_model"],
         query_transformer_model=cfg["models"]["query_transformer"],
+        contextual_chunk_creator_model = cfg["models"]["contextual_chunk_model"],
         eval_llm_model=cfg["models"]["eval_llm_model"],
         reranker_model=cfg["models"]["reranker_model"],
         collection_name=cfg["vectorstore"]["collection_name"],
