@@ -1,0 +1,3 @@
+# Exclude Jupyter notebooks from language statistics
+# Mark notebooks as generated so GitHub Linguist will ignore them
+*.ipynb linguist-generated
