@@ -5,3 +5,5 @@ __pycache__
 record.txt
 config.yaml
 tests
+*.xlsx
+.env
