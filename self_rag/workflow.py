@@ -100,7 +100,7 @@ def fuse_rerank_node(state:state):
     fused_docs =  [lookup[key] for key in sorted(scores, key=scores.get, reverse=True)][:10]
 
     #### Fuse then Rerank steps using Cross-Encoder-Reranker
-    compressor = CrossEncoderReranker(model = HuggingFaceCrossEncoder(model_name = load_config().reranker_model),top_n = 5)
+    compressor = CrossEncoderReranker(model = HuggingFaceCrossEncoder(model_name = load_config().reranker_model, model_kwargs={"max_length": 512}),top_n = 5)
     fused_reranked_docs = compressor.compress_documents(documents=fused_docs, query=state['user_query'])
 
     return {"retrieved_docs": fused_reranked_docs}

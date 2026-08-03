@@ -208,7 +208,7 @@ class Chunker:
 
         for i in chunks:
             print("calling\n")
-            response = contextual_creator_model.invoke(prompt.format(WHOLE_DOCUMENT = entire_doc[0].page_content, CHUNK_CONTENT = i.page_content))
+            response = contextual_creator_model.invoke(prompt.format(WHOLE_DOCUMENT = "\n\n".join(d.page_content for d in entire_doc), CHUNK_CONTENT = i.page_content))
             i.page_content = response.content + "\n" + i.page_content
         
         return chunks

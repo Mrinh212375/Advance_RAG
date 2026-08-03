@@ -1,4 +1,19 @@
 import os
+import sys
+import types
+
+# ragas 0.4.3 unconditionally imports langchain_community.chat_models.vertexai (only used for an
+# isinstance check against VertexAI chat models, which this project never uses), but that module
+# was removed in langchain-community>=0.4 in favor of the standalone langchain-google-vertexai
+# package. Stub it out so the import in ragas.llms.base succeeds without pulling in VertexAI.
+if "langchain_community.chat_models.vertexai" not in sys.modules:
+    _vertexai_shim = types.ModuleType("langchain_community.chat_models.vertexai")
+
+    class ChatVertexAI:
+        pass
+
+    _vertexai_shim.ChatVertexAI = ChatVertexAI
+    sys.modules["langchain_community.chat_models.vertexai"] = _vertexai_shim
 
 import pandas as pd
 from datasets import Dataset
